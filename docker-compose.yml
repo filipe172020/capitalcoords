@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_docker
+    restart: always
+    environment:
+      POSTGRES_USER: anagaming_filipe
+      POSTGRES_PASSWORD: anagaming
+      POSTGRES_DB: anagaming_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    container_name: nextjs_app
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://anagaming_filipe:anagaming@postgres:5432/anagaming_db
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    command: sh -c "npm install && npm run dev"
+
+volumes:
+  postgres_data:
