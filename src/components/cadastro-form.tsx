@@ -57,7 +57,7 @@ export function CadastroForm({
 
       const data = await res.json();
       localStorage.setItem("token", data.token);
-      window.location.href = "/login";
+      window.location.href = "/homepage";
 
     } catch (err: any) {
       setError("Erro na requisição. Tente novamente.");

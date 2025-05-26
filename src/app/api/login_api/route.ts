@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const client = await pool.connect();
 
     const result = await client.query(
-      'SELECT id, email, password FROM "user" WHERE email = $1',
+      'SELECT id, email, password FROM "users" WHERE email = $1',
       [email]
     );
 

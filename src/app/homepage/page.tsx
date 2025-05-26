@@ -1,44 +1,107 @@
+"use client";
 
+import { useEffect, useState } from "react";
+import { Advantage } from "@/types/sportsbook";
 
 export default function HomePage() {
-    return (
-      <div className="min-h-screen bg-white-100 flex flex-col">
-        <header className="bg-orange-500 p-4 flex items-center justify-between h-22a">
-          <img />
-          <div className="space-x-4">
-            <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition">Cadastre-se</button>
-          </div>
-        </header>
-  
-        <div className="flex flex-1 pl-20 pr-80">
+  const [advantages, setAdvantages] = useState<Advantage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filterSport, setFilterSport] = useState<string>("all");
 
-          <aside className="w-64 p-14">
-            <h2 className="text-sm font-bold mb-4">FUTEBOL</h2>
-            <ul className="space-y-4">
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Premier League</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">La Liga</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Serie A</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Ligue 1</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Bundesliga</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Brasileirão</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Libertadores</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Sulamericana</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Liga dos campeões</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Liga Conferência</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Liga Europa</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Copa do Brasil</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Eurocopa</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Copa do Mundo</li>
-              <li className="text-sm text-gray-700 hover:text-orange-600 cursor-pointer">Copa America</li>
-            </ul>
-          </aside>
-  
-          {/* conteúdo principal */}
-          <main className="flex-1 bg-white mt-10 ml-10 mr-24 rounded-xl shadow-lg border">
+  useEffect(() => {
+    fetch("https://betsapi2.p.rapidapi.com/v3/bet365/prematch://betsapi2.p.rapidapi.com/v1/bet365/inplay_filter?sport_id=1", {
+      method: "GET",
+      headers: {
+        "x-rapidapi-host": "betsapi2.p.rapidapi.com",
+        "x-rapidapi-key": "5da7cd95ebmshff4da14f2159141p154f27jsnd53855ef90cb",
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro na requisição");
+        return res.json();
+      })
+      .then((json) => {
+        setAdvantages(json.advantages || []);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
 
-          </main>
-        </div>
-      </div>
-    );
-  }
-  
+  if (loading) return <p>Carregando eventos...</p>;
+  if (error) return <p>Erro: {error}</p>;
+
+  const advantagesWithEvent = advantages.filter(
+    (adv) => adv.market && adv.market.event !== undefined
+  );
+
+  const sportsList = Array.from(
+    new Set(
+      advantagesWithEvent
+        .map((adv) => adv.market.event!.participants?.[0]?.sport)
+        .filter((sport) => sport !== undefined)
+    )
+  );
+
+  const filteredAdvantages = advantagesWithEvent.filter((adv) => {
+    if (filterSport === "all") return true;
+    return adv.market.event!.participants?.[0]?.sport === filterSport;
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <h1 className="text-3xl font-bold mb-6">Eventos esportivos</h1>
+
+      <label className="block mb-6">
+        Filtrar por esporte:{" "}
+        <select
+          className="ml-2 p-2 border rounded"
+          value={filterSport}
+          onChange={(e) => setFilterSport(e.target.value)}
+        >
+          <option value="all">Todos</option>
+          {sportsList.map((sport) => (
+            <option key={sport} value={sport}>
+              {sport}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      {filteredAdvantages.length === 0 ? (
+        <p>Nenhum evento para este filtro.</p>
+      ) : (
+        filteredAdvantages.map((adv) => {
+          const event = adv.market.event!;
+          const startTime = new Date(event.startTime).toLocaleString();
+
+          return (
+            <div
+              key={adv.key}
+              className="bg-white p-6 rounded shadow-md border border-gray-200 mb-6"
+            >
+              <h2 className="text-xl font-semibold">{event.name}</h2>
+              <p className="text-gray-600 mb-2">
+                Horário: {startTime} | Esporte: {event.participants?.[0]?.sport || "Desconhecido"}
+              </p>
+              <p className="mb-2">Mercado: {adv.market.type}</p>
+
+              <div className="flex gap-4 flex-wrap">
+                {event.participants.map((p) => (
+                  <div
+                    key={p.key}
+                    className="border rounded p-3 w-48 bg-gray-50 shadow-sm"
+                  >
+                    <h3 className="font-medium">{p.name}</h3>
+                    <p className="text-sm italic text-gray-600">{p.slug}</p>
+                    <p>Esporte: {p.sport}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+}

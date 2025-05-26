@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const client = await pool.connect();
 
-    const existing = await client.query('SELECT id FROM "user" WHERE email = $1', [email]);
+    const existing = await client.query('SELECT id FROM "users" WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
       client.release();
       return NextResponse.json({ error: "Usuário já cadastrado" }, { status: 409 });
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await client.query(
-      'INSERT INTO "user" (email, password, name) VALUES ($1, $2, $3) RETURNING id, email',
+      'INSERT INTO "users" (email, password, name) VALUES ($1, $2, $3) RETURNING id, email',
       [email, hashedPassword, username]
     );
 
