@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OddAnalyzer - Analisador"
+  title: "CapitalCoords"
 };
 
 export default function RootLayout({

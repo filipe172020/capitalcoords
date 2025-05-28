@@ -10,8 +10,8 @@ export default function Login() {
           <a href="#" className="flex items-center gap-2 font-medium">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground bg-purple-600">
               <MicrowaveIcon className="size-4" />
-            </div> 
-            Odd Analyzer - O analisador de Odd's do mercado!
+            </div>
+            <img src="/capitalcoord_logo.png" className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale" />
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
@@ -21,11 +21,7 @@ export default function Login() {
         </div>
       </div>
       <div className="relative hidden bg-muted lg:block">
-        <img
-          src="/imageBet.png"
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
+        <img src="/capitalcoord_logo.png" className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale" />
       </div>
     </div>
   )
